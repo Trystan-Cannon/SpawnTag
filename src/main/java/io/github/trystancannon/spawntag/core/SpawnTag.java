@@ -116,12 +116,12 @@ public class SpawnTag extends JavaPlugin {
             Player playerIssuingCommand = (Player) sender;
             
             String worldName = "";
-            if (args.length == 1) {
+            if (args.length >= 1) {
                 worldName = args[0];
             }
             
             if (command.getName().equalsIgnoreCase("stspawncreate")) {
-                handleRegionCreateCommand(playerIssuingCommand, worldName);
+                handleRegionCreateCommand(playerIssuingCommand, worldName, args.length >= 2 ? args[1] : "-1");
                 return true;
             }
             else if (command.getName().equalsIgnoreCase("stspawndelete")) {
@@ -140,15 +140,22 @@ public class SpawnTag extends JavaPlugin {
      * @param playerIssuingCommand Player who is executing the command.
      * @param worldName Unadjusted name of the world around which a region will be created.
      */
-    private void handleRegionCreateCommand(Player playerIssuingCommand, String worldName) {
+    private void handleRegionCreateCommand(Player playerIssuingCommand, String worldName, String radius) {
         worldName = adjustWorldName(worldName);
         World world = getServer().getWorld(worldName);
+        int regionRadius = getServer().getSpawnRadius();
+        
+        // Attempt to convert the radius argument to a valid integer.
+        try {
+            int convertedRadius = Integer.parseInt(radius);
+            regionRadius = convertedRadius >= 1 ? convertedRadius : regionRadius;
+        } catch (NumberFormatException failure) {}
         
         if (regions.get(worldName) == null && world != null) {
-            createSpawnTagRegion(world, true);
+            createSpawnTagRegion(world, regionRadius, true);
             playerIssuingCommand.sendMessage(ChatColor.GOLD + "[Spawn Tag] Region around the spawn of " + world.getName() + " created successfully.");
         } else {
-            playerIssuingCommand.sendMessage(ChatColor.RED + "[Spawn Tag] Error: Region around that spawn already exists or the world provided is nonexistent.");
+            playerIssuingCommand.sendMessage(ChatColor.RED + "[Spawn Tag] Error: Region around that spawn already exists, the world provided is nonexistent, or invalid radius.");
         }
     }
     
@@ -202,11 +209,14 @@ public class SpawnTag extends JavaPlugin {
      * Creates a spawn tag region around the spawn of the given world.
      * 
      * @param world World in which this region is to be placed around its spawn.
+     * @param radius Radius of the square spawn tag region around the spawn.
      * @param updateConfig Whether or not to update the config file with this
      * new region.
      */
-    private void createSpawnTagRegion(World world, boolean updateConfig) {
-        SpawnTagRegion region = new SpawnTagRegion(world.getName(), world.getSpawnLocation(), getServer().getSpawnRadius(), this);
+    private void createSpawnTagRegion(World world, int radius, boolean updateConfig) {
+        radius = radius >= 1 ? radius : getServer().getSpawnRadius();
+        
+        SpawnTagRegion region = new SpawnTagRegion(world.getName(), world.getSpawnLocation(), radius, this);
         getServer().getPluginManager().registerEvents(region, this);
         
         regions.put(world.getName(), region);
@@ -277,7 +287,7 @@ public class SpawnTag extends JavaPlugin {
         if (configFile.exists()) {
             try (Scanner fileScanner = new Scanner(configPath, StandardCharsets.UTF_8.name())) {
                 while (fileScanner.hasNextLine()) {
-                    createSpawnTagRegion(Bukkit.getWorld(UUID.fromString(fileScanner.nextLine())), false);
+                    createSpawnTagRegion(Bukkit.getWorld(UUID.fromString(fileScanner.nextLine())), -1, false);
                 }
             } catch (IOException failure) {
                 return false;

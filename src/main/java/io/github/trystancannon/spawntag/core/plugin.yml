@@ -5,7 +5,7 @@ version: 0.1
 commands:
     stspawncreate:
         description: Creates a new spawn tag region around the spawn of the specified world.
-        usage: /<command> [world name]
+        usage: /<command> [world name] [radius]
         permission: spawntag.create
         
     stspawndelete:
