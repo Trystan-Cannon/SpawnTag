@@ -1,0 +1,27 @@
+name: SpawnTag
+main: io.github.trystancannon.spawntag.core.SpawnTag
+version: 0.1
+
+commands:
+    stspawncreate:
+        description: Creates a new spawn tag region around the spawn of the specified world.
+        usage: /<command> [world name]
+        permission: spawntag.create
+        
+    stspawndelete:
+        description: Deletes the spawn tag region around the spawn of the specified world.
+        usage: /<command> [world name]
+        permission: spawntag.delete
+
+permissions:
+    spawntag.*:
+        description: Gives access to all spawn tag commands.
+        children:
+            spawntag.create: true
+            spawntag.delete: true
+    spawntag.create:
+        description: Allows the creation of spawn tag regions.
+        default: op
+    spawntag.delete:
+        description: Allows the deletion of existing spawn tag regions.
+        default: op
