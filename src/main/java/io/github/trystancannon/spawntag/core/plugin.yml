@@ -1,6 +1,6 @@
 name: SpawnTag
 main: io.github.trystancannon.spawntag.core.SpawnTag
-version: 0.1
+version: 1.2
 
 commands:
     stspawncreate:

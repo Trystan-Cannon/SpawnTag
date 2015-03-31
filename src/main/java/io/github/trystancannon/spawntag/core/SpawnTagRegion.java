@@ -115,4 +115,11 @@ public class SpawnTagRegion implements Listener {
     public Location getLocation() {
         return location;
     }
+    
+    /**
+     * @return Radius of the region.
+     */
+    public int getRadius() {
+        return radius;
+    }
 }

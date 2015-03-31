@@ -260,7 +260,7 @@ public class SpawnTag extends JavaPlugin {
         
         try (PrintWriter writer = new PrintWriter(getDataFolder() + "/config.txt", "UTF-8")) {
             for (SpawnTagRegion region : regions.values()) {
-                writer.println(region.getLocation().getWorld().getUID());
+                writer.println(region.getLocation().getWorld().getUID() + " " + region.getRadius());
             }
             
             writer.flush();
@@ -286,8 +286,14 @@ public class SpawnTag extends JavaPlugin {
         // TODO: Reading needs fixing.
         if (configFile.exists()) {
             try (Scanner fileScanner = new Scanner(configPath, StandardCharsets.UTF_8.name())) {
+                String[] lineContents;
+                
                 while (fileScanner.hasNextLine()) {
-                    createSpawnTagRegion(Bukkit.getWorld(UUID.fromString(fileScanner.nextLine())), -1, false);
+                    lineContents = fileScanner.nextLine().split(" ");
+                    
+                    if (lineContents.length >= 2) {
+                        createSpawnTagRegion(Bukkit.getWorld(UUID.fromString(lineContents[0])), convertIntFromString(lineContents[1]), false);
+                    }
                 }
             } catch (IOException failure) {
                 return false;
@@ -297,5 +303,22 @@ public class SpawnTag extends JavaPlugin {
         }
         
         return false;
+    }
+    
+    /**
+     * Converts the given string to a native integer. However, if this fails,
+     * the integer returned is -1.
+     * 
+     * @param number
+     * @return 
+     */
+    private int convertIntFromString(String number) {
+        try {
+            int radius = Integer.parseInt(number);
+            return radius;
+        } catch (NumberFormatException failure) {
+        }
+        
+        return -1;
     }
 }
